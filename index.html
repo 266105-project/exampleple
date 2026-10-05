@@ -11,6 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,11 +32,44 @@
           </svg>
           <span>FocusDo</span>
         </div>
+
+        <!-- Auth Status & Controls -->
+        <div class="header-auth" id="header-auth">
+          <button type="button" class="auth-btn" id="open-auth-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>로그인</span>
+          </button>
+
+          <div class="user-profile-badge" id="user-profile-badge" style="display: none;">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <span class="user-email" id="user-email" title="내 계정">user@example.com</span>
+            <button type="button" class="logout-icon-btn" id="logout-btn" title="로그아웃" aria-label="로그아웃">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="title-row">
+        <div>
+          <h1 class="main-title">오늘의 할 일</h1>
+          <p class="subtitle" id="app-subtitle">집중할 작업들을 등록하고 하나씩 달성해 보세요.</p>
+        </div>
         <span class="current-date" id="current-date">Today</span>
       </div>
 
-      <h1 class="main-title">오늘의 할 일</h1>
-      <p class="subtitle">집중할 작업들을 등록하고 하나씩 달성해 보세요.</p>
+      <!-- Sync Banner (Displays when not logged in) -->
+      <div class="guest-banner" id="guest-banner">
+        <span>💡 로그인하시면 작성한 할 일이 <b>Supabase 클라우드</b>에 안전하게 자동 저장됩니다.</span>
+        <button type="button" class="banner-link-btn" id="banner-login-btn">로그인하기</button>
+      </div>
 
       <!-- Progress Card -->
       <div class="progress-card" id="progress-card">
@@ -123,8 +159,69 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>단축키 팁: <kbd>/</kbd> 키를 누르면 입력창으로 즉시 이동합니다.</p>
+      <p>단축키 팁: <kbd>/</kbd> 키로 입력창 이동 | <span id="storage-status-text">💾 로컬 게스트 모드</span></p>
     </footer>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <button type="button" class="modal-close-btn" id="close-auth-modal" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="auth-header">
+        <div class="auth-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <h2 class="auth-title" id="auth-modal-title">FocusDo 계정</h2>
+        <p class="auth-subtitle">로그인하면 어느 기기에서든 동일한 할 일을 관리할 수 있습니다.</p>
+      </div>
+
+      <!-- Auth Tabs: Login vs Register -->
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tab-login" data-tab="login">로그인</button>
+        <button type="button" class="auth-tab" id="tab-signup" data-tab="signup">회원가입</button>
+      </div>
+
+      <!-- Form Error / Info Message -->
+      <div class="auth-message" id="auth-message" style="display: none;"></div>
+
+      <form class="auth-form" id="auth-form" autocomplete="on">
+        <div class="form-group">
+          <label for="auth-email">이메일 주소</label>
+          <div class="auth-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input type="email" id="auth-email" placeholder="example@email.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-password">비밀번호</label>
+          <div class="auth-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="auth-password" placeholder="6자리 이상 비밀번호" minlength="6" required autocomplete="current-password">
+          </div>
+        </div>
+
+        <button type="submit" class="auth-submit-btn" id="auth-submit-btn">
+          <span id="auth-submit-text">로그인</span>
+          <div class="spinner" id="auth-spinner" style="display: none;"></div>
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Toast Notification Container -->
