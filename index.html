@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="직관적이고 미려한 인터페이스로 오늘의 할 일을 빠르고 우아하게 기록하고 관리하는 모던 To-Do List 웹 애플리케이션입니다.">
+  <title>FocusDo — 모던 심플 투두리스트</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="glow-orb glow-top-left" aria-hidden="true"></div>
+  <div class="glow-orb glow-bottom-right" aria-hidden="true"></div>
+
+  <div class="app-container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand-badge">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <span>FocusDo</span>
+        </div>
+        <span class="current-date" id="current-date">Today</span>
+      </div>
+
+      <h1 class="main-title">오늘의 할 일</h1>
+      <p class="subtitle">집중할 작업들을 등록하고 하나씩 달성해 보세요.</p>
+
+      <!-- Progress Card -->
+      <div class="progress-card" id="progress-card">
+        <div class="progress-info">
+          <span class="progress-label">완료율</span>
+          <span class="progress-percent" id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div class="progress-stats">
+          <span id="stat-remaining">남은 할 일: 0개</span>
+          <span id="stat-completed">완료: 0 / 0개</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="app-main">
+      <!-- Input Form -->
+      <form class="todo-form" id="todo-form" autocomplete="off">
+        <div class="input-wrapper">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="todo-input" 
+            class="todo-input" 
+            placeholder="어떤 할 일을 완료할까요? (Enter로 등록)" 
+            maxlength="120"
+            required
+            aria-label="새로운 할 일 입력"
+          >
+          <button type="submit" id="add-btn" class="add-btn" aria-label="할 일 추가">
+            <span>추가</span>
+            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Filter Controls & Quick Actions -->
+      <div class="controls-bar">
+        <div class="filter-tabs" role="tablist" aria-label="할 일 필터">
+          <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true" id="filter-all">
+            전체 <span class="tab-count" id="count-all">0</span>
+          </button>
+          <button class="filter-tab" data-filter="active" role="tab" aria-selected="false" id="filter-active">
+            진행 중 <span class="tab-count" id="count-active">0</span>
+          </button>
+          <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false" id="filter-completed">
+            완료 <span class="tab-count" id="count-completed">0</span>
+          </button>
+        </div>
+
+        <button type="button" class="clear-completed-btn" id="clear-completed-btn" title="완료된 항목 모두 삭제">
+          완료 항목 정리
+        </button>
+      </div>
+
+      <!-- Todo List Container -->
+      <div class="list-container">
+        <ul class="todo-list" id="todo-list" aria-live="polite">
+          <!-- Dynamically injected items -->
+        </ul>
+
+        <!-- Empty State Message -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h2 class="empty-title">등록된 할 일이 없습니다</h2>
+          <p class="empty-desc">오늘 시작하고 싶은 멋진 계획을 상단에 입력해 보세요!</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>단축키 팁: <kbd>/</kbd> 키를 누르면 입력창으로 즉시 이동합니다.</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
